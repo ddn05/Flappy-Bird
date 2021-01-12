@@ -1,5 +1,5 @@
 //pilih canvas
-const cvs = document.getElementById("bird")
+const cvs = document.getElementById("flappy")
 const ctx = cvs.getContext("2d")
 
 //membuat variabel
@@ -44,8 +44,51 @@ const fg = {
 //bird
 const bird = {
     animation : [
-        
-    ]
+        {sX:276, sY:112},
+        {sX:276, sY:139},
+        {sX:276, sY:164},
+        {sX:276, sY:139}
+    ],
+    x : 50,
+    y : 150,
+    w : 34,
+    h : 26,
+
+    frame : 0,
+    
+    draw : function(){
+        let bird = this.animation[this.frame];
+
+        ctx.drawImage(sprite, bird.sX, bird.sY, this.w, this.h, this.x - this.w/2, this.y - this.h/2,this.w, this.h);
+    }
+}
+
+//pesan getReady
+const getReady = {
+    sX : 0,
+    sY : 228,
+    w  : 173,
+    h  : 152,
+    x  : cvs.width/2-173/2,
+    y  : 80,
+
+    draw : function(){
+        ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y, this.w, this.h);
+    }
+}
+
+//pesan game over message
+const gameOver = {
+    sX : 175,
+    sY : 228,
+    w  : 225,
+    h  : 202,
+    x  : cvs.width/2-225/2,
+    y  : 90,
+
+    draw : function(){
+        ctx.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y, this.w, this.h);
+    }
 }
 
 //draw
@@ -55,6 +98,9 @@ function draw(){
     
     bg.draw();
     fg.draw();
+    bird.draw();
+    getReady.draw();
+    gameOver.draw();
 }
 
 //update
@@ -70,3 +116,4 @@ function loop(){
 
     requestAnimationFrame(loop);
 }
+loop();
