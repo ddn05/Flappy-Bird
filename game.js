@@ -83,10 +83,21 @@ const bird = {
         let bird = this.animation[this.frame];
 
         ctx.drawImage(sprite, bird.sX, bird.sY, this.w, this.h, this.x - this.w/2, this.y - this.h/2,this.w, this.h);
-    }
+    },
 
     flap : function(){
 
+    },
+
+    update : function(){
+        //if the game state is get ready state, the bird must flap slowly
+        this.period = state.current == state.getReady ? 10 : 5;
+
+        //we increment the frame by 1, each period
+        this.frame += frames % this.period == 0 ? 1 : 0;
+
+        //frane fies frin 0 to 4, then again to 0
+        this.frame = this.frame % this.animation.length;
     }
 }
 
@@ -136,7 +147,7 @@ function draw(){
 
 //update
 function update(){
-
+    bird.update();
 }
 
 //loop
