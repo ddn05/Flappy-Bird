@@ -18,6 +18,14 @@ const state = {
     over : 2
 }
 
+//button start
+const startBtn = {
+    x : 120,
+    y : 263,
+    w : 83,
+    h : 29
+}
+
 //control the game
 document.addEventListener("click", function(evt){
     switch(state.current){
@@ -28,7 +36,17 @@ document.addEventListener("click", function(evt){
             bird.flap();
             break;
         case state.over:
-            state.current = state.getReady;
+            let rect= cvs.getBoundingClientRect();
+            let clickX = evt.clientX - rect.left;
+            let clickY = evt.clientY - rect.top;
+
+            //check if we click on the start button
+            if(clickX >= startBtn.x && clickX <= startBtn.x + startBtn.w && clickY >= startBtn.y && clickY <= startBtn.y + startBtn.h){
+                pipes.reset();
+                bird.speedReset();
+                score.reset();
+                state.current = state.getReady;
+            }
             break;
     }
 });
@@ -93,6 +111,8 @@ const bird = {
     speed : 0,
     rotation : 0,
 
+    radius : 12,
+
     draw : function(){
         let bird = this.animation[this.frame];
 
@@ -141,6 +161,9 @@ const bird = {
                 this.rotation = -25 * DEGREE;
             }
         }
+    },
+    speedReset : function(){
+        this.speed = 0;
     }
 }
 
@@ -221,8 +244,69 @@ const pipes = {
         }
         for(let i = 0; i < this.position.length; i++){
             let p = this.position[i];
+            let bottomPipeYPos = p.y + this.h + this.gap;
+
+            //collision detection
+            // top pipe
+            if(bird.x + bird.radius > p.x && bird.x - bird.radius < p.x + this.w && bird.y + bird.radius > p.y && bird.y - bird.radius < p.y + this.h){
+                state.current = state.over;
+            }
+            // top pipe
+            if(bird.x + bird.radius > p.x && bird.x - bird.radius < p.x + this.w && bird.y + bird.radius > bottomPipeYPos && bird.y - bird.radius < bottomPipeYPos + this.h){
+                state.current = state.over;
+            }
+
+            //move the pipes to the left
             p.x -= this.dx;
+
+            //if ther pipes go beyond canvas, we deleted them from the array
+            if(p.x + this.w <= 0){
+                this.position.shift();
+
+                score.value += 1;
+                
+                score.best = Math.max(score.value, score.best);
+                localStorage.setItem("best", score.best);
+            }
         }
+    },
+
+    reset : function(){
+        this.position = [];
+    }
+}
+
+//score
+const score = {
+    best : parseInt(localStorage.getItem("best")) || 0,
+    value : 0,
+
+    draw : function(){
+        ctx.fillStyle = "#FFF";
+        ctx.strokeStyle='#000';
+
+        if(state.current == state.game){
+            ctx.lineWidth = 2;
+            ctx.font = "35px Teko";
+            ctx.fillText(this.value,cvs.width /2, 50);
+            ctx.strokeText(this.value, cvs.width/2, 50);
+        }
+        else if(state.current == state.over){
+            //score value
+            ctx.font = "25px Teko"
+            ctx.fillText(this.value, 225, 186);
+            ctx.strokeText(this.value, 225, 186);
+
+            //best value
+            ctx.font = "25px Teko"
+            ctx.fillText(this.best, 225, 228);
+            ctx.strokeText(this.best, 225, 228);
+        }
+        
+    },
+
+    reset : function(){
+        this.value = 0;
     }
 }
 
@@ -237,6 +321,7 @@ function draw(){
     bird.draw();
     getReady.draw();
     gameOver.draw();
+    score.draw();
 }
 
 //update
